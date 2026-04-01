@@ -1,2 +1,25 @@
+# macOS
 .DS_Store
-.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.env
+*.venv
+
+# Databricks / Jupyter
+.ipynb_checkpoints/
+
+# SQL / Scripts
+*.log
+*.tmp
+
+# Azure / ADF / DevOps
+*.json
+*.yml
+
+# IDEs
+.vscode/
+.idea/
