@@ -1,0 +1,47 @@
+{
+  "name": "Incremental_Load_Pipeline",
+  "properties": {
+    "activities": [
+      {
+        "name": "Lookup_Last_Watermark",
+        "type": "Lookup",
+        "typeProperties": {
+          "source": {
+            "type": "SqlSource",
+            "sqlReaderQuery": "SELECT MAX(updated_at) AS last_watermark FROM watermark_table"
+          }
+        }
+      },
+      {
+        "name": "Copy_Data_SQL_to_ADLS",
+        "type": "Copy",
+        "dependsOn": [
+          {
+            "activity": "Lookup_Last_Watermark",
+            "dependencyConditions": ["Succeeded"]
+          }
+        ],
+        "typeProperties": {
+          "source": {
+            "type": "SqlSource",
+            "sqlReaderQuery": "SELECT * FROM claims WHERE updated_at > '@{activity('Lookup_Last_Watermark').output.firstRow.last_watermark}'"
+          },
+          "sink": {
+            "type": "DelimitedTextSink"
+          }
+        }
+      },
+      {
+        "name": "Trigger_Databricks_Transformation",
+        "type": "DatabricksNotebook",
+        "typeProperties": {
+          "notebookPath": "/Shared/02_silver_transformation",
+          "baseParameters": {
+            "input_path": "adl://bronze/claims/",
+            "output_path": "adl://silver/claims/"
+          }
+        }
+      }
+    ]
+  }
+}
